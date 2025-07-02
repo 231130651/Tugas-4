@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:weatherapp/utils/colors_util.dart'; // Pastikan ini benar
+import 'package:weatherapp/utils/colors_util.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -22,23 +22,17 @@ class _SplashScreenState extends State<SplashScreen> {
             end: Alignment.bottomLeft,
           ),
         ),
-        child: SafeArea(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Image.asset('assets/cerah.png', height: 160, width: 160,),
-              Text(
-                "BaBa Weater",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: FirstColors,
-                ),
-              ),
-            ],
-          ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Image.asset('assets/logo.png', width: 150, height: 150),
+            SizedBox(height: 10),
+            Text(
+              'GO CHECK YOUR\n WEATHER NOW',
+              style: TextStyle(color: FirstColors,fontWeight: FontWeight.bold),
+            ),
+          ],
         ),
       ),
     );
