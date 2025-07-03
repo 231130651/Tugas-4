@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:weatherapp/controller/api_controller.dart';
+import 'package:weatherapp/controller/auth_controller.dart';
 import 'package:weatherapp/view/forecast_weather.dart';
 
 class HomeWeatherScreen extends StatefulWidget {
@@ -12,6 +13,7 @@ class HomeWeatherScreen extends StatefulWidget {
 
 class _HomeWeatherScreenState extends State<HomeWeatherScreen> {
   final WeatherApi _weatherApi = WeatherApi();
+  final TextEditingController _searchController = TextEditingController();
   Future<Map<String, dynamic>>? _weatherData;
   String _location = "Medan, Indonesia";
 
@@ -27,12 +29,32 @@ class _HomeWeatherScreenState extends State<HomeWeatherScreen> {
     });
   }
 
-  // >>> KODE BAGIAN ATAS (build, _buildCurrentWeatherSection) TETAP SAMA <<<
-  // ... (salin dari jawaban sebelumnya)
-  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF63D2D2),
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        title: const Text(
+          'Hello!',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: IconButton(
+              onPressed: () => AuthController.logout(context),
+              icon: const Icon(Icons.logout, color: Colors.white, size: 28),
+              tooltip: 'Logout',
+            ),
+          )
+        ],
+      ),
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -48,14 +70,14 @@ class _HomeWeatherScreenState extends State<HomeWeatherScreen> {
           child: Column(
             children: [
               _buildCurrentWeatherSection(),
-              _buildWeeklyForecastSection(), // Bagian ini akan dimodifikasi
+              _buildWeeklyForecastSection(),
             ],
           ),
         ),
       ),
     );
   }
-  
+
   Widget _buildCurrentWeatherSection() {
     return Expanded(
       flex: 2,
@@ -65,6 +87,7 @@ class _HomeWeatherScreenState extends State<HomeWeatherScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextField(
+              controller: _searchController,
               onSubmitted: (value) {
                 if (value.isNotEmpty) {
                   _location = value;
@@ -73,18 +96,18 @@ class _HomeWeatherScreenState extends State<HomeWeatherScreen> {
               },
               decoration: InputDecoration(
                 hintText: 'Find your location',
-                prefixIcon: const Icon(Icons.search, color: Colors.white),
+                suffixIcon: const Icon(Icons.search, color: Colors.grey),
                 filled: true,
+                // ignore: deprecated_member_use
                 fillColor: Colors.white.withOpacity(0.9),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30.0),
                   borderSide: BorderSide.none,
                 ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 16.0)
+                contentPadding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 20.0),
               ),
             ),
             const SizedBox(height: 40),
-            
             FutureBuilder<Map<String, dynamic>>(
               future: _weatherData,
               builder: (context, snapshot) {
@@ -143,14 +166,12 @@ class _HomeWeatherScreenState extends State<HomeWeatherScreen> {
     );
   }
 
-
-  // ### MODIFIKASI DIMULAI DI SINI ###
   Widget _buildWeeklyForecastSection() {
     return Expanded(
       flex: 1,
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(24, 24, 24, 12), // Padding bawah dikecilkan
+        padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
         decoration: const BoxDecoration(
           color: Color(0xFFB1EAE3),
           borderRadius: BorderRadius.only(
@@ -169,7 +190,6 @@ class _HomeWeatherScreenState extends State<HomeWeatherScreen> {
             }
             if (snapshot.hasData) {
               final forecastDays = snapshot.data!['forecast']['forecastday'] as List;
-              // Ambil data mulai dari besok untuk ditampilkan di ringkasan
               final summaryForecast = forecastDays.skip(1).take(3).toList();
 
               return Column(
@@ -184,10 +204,9 @@ class _HomeWeatherScreenState extends State<HomeWeatherScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  // Menampilkan ringkasan 3 hari berikutnya
                   Expanded(
                     child: ListView.builder(
-                      physics: const NeverScrollableScrollPhysics(), // Biar tidak bisa di-scroll
+                      physics: const NeverScrollableScrollPhysics(),
                       itemCount: summaryForecast.length,
                       itemBuilder: (context, index) {
                         final day = summaryForecast[index];
@@ -199,16 +218,14 @@ class _HomeWeatherScreenState extends State<HomeWeatherScreen> {
                       },
                     ),
                   ),
-                  // Tombol untuk navigasi
                   Center(
                     child: TextButton(
                       onPressed: () {
-                        // Navigasi ke halaman 7 hari dengan mengirim data
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => SevenDayForecastPage(
-                              forecastDays: forecastDays, // Kirim semua data 7 hari
+                              forecastDays: forecastDays,
                             ),
                           ),
                         );
@@ -216,10 +233,12 @@ class _HomeWeatherScreenState extends State<HomeWeatherScreen> {
                       child: const Text(
                         'View 7-Day Forecast',
                         style: TextStyle(
-                            fontWeight: FontWeight.bold, color: Colors.black54),
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black54,
+                        ),
                       ),
                     ),
-                  )
+                  ),
                 ],
               );
             }
@@ -230,7 +249,6 @@ class _HomeWeatherScreenState extends State<HomeWeatherScreen> {
     );
   }
 
-  // Widget untuk item di ringkasan forecast (disederhanakan)
   Widget _buildForecastItem({
     required String iconUrl,
     required String day,
