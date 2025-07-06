@@ -15,10 +15,10 @@ class HistoryScreen extends StatelessWidget {
         backgroundColor: const Color(0xFF63D2D2),
         title: const Text(
           'History',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.black),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -51,17 +51,53 @@ class HistoryScreen extends StatelessWidget {
                     final location = data['location'] ?? 'Unknown';
                     final temperature = data['temperature'];
                     final timestamp = (data['timestamp'] as Timestamp?)?.toDate();
+                    final dateString = timestamp != null
+                        ? DateFormat('dd-MM-yyyy').format(timestamp)
+                        : '';
 
-                    return ListTile(
-                      leading: const Icon(Icons.history),
-                      title: Text(location),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (temperature != null) Text('${temperature.round()}°C'),
-                          if (timestamp != null)
-                            Text(DateFormat('dd-MM-yyyy').format(timestamp)),
-                        ],
+                    return Card(
+                      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15.0),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.history, size: 36, color: Colors.grey),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    location,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  if (temperature != null)
+                                    Text(
+                                      '${temperature.round()}°C',
+                                      style: const TextStyle(
+                                        color: Colors.black54,
+                                      ),
+                                    ),
+                                  if (dateString.isNotEmpty)
+                                    Text(
+                                      dateString,
+                                      style: const TextStyle(
+                                        color: Colors.black54,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },
