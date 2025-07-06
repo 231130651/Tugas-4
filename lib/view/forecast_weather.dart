@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class SevenDayForecastPage extends StatelessWidget {
-  // Menerima data ramalan dari halaman utama
   final List<dynamic> forecastDays;
-
   const SevenDayForecastPage({
     super.key,
     required this.forecastDays,
@@ -34,20 +32,18 @@ class SevenDayForecastPage extends StatelessWidget {
               padding: const EdgeInsets.all(16.0),
               child: Row(
                 children: [
-                  // Ikon Cuaca
                   Image.network(
                     'https:${dayInfo['condition']['icon']}',
                     width: 50,
                     height: 50,
                   ),
                   const SizedBox(width: 16),
-                  // Informasi Tanggal dan Kondisi
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          DateFormat('EEEE, d MMM').format(date), // Format: "Monday, 2 Jul"
+                          DateFormat('EEEE, d MMM').format(date),
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
@@ -65,7 +61,6 @@ class SevenDayForecastPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 16),
-                  // Informasi Suhu (Tertinggi / Terendah)
                   Text(
                     '${dayInfo['maxtemp_c'].round()}° / ${dayInfo['mintemp_c'].round()}°',
                     style: const TextStyle(

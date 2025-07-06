@@ -3,6 +3,9 @@ import 'package:intl/intl.dart';
 import 'package:weatherapp/controller/api_controller.dart';
 import 'package:weatherapp/controller/auth_controller.dart';
 import 'package:weatherapp/view/forecast_weather.dart';
+import 'package:weatherapp/view/history_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class HomeWeatherScreen extends StatefulWidget {
   const HomeWeatherScreen({super.key});
@@ -23,10 +26,27 @@ class _HomeWeatherScreenState extends State<HomeWeatherScreen> {
     _fetchWeather();
   }
 
-  void _fetchWeather() {
+  Future<void> _fetchWeather() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    final forecastData = await _weatherApi.getForecast(_location);
+
     setState(() {
-      _weatherData = _weatherApi.getForecast(_location);
+      _weatherData = Future.value(forecastData);
     });
+
+    if (user != null) {
+      final current = forecastData['current'];
+      await FirebaseFirestore.instance
+          .collection('search_history')
+          .doc(user.uid)
+          .collection('items')
+          .add({
+        'location': _location,
+        'temperature': current['temp_c'],
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+    }
   }
 
   @override
@@ -45,6 +65,16 @@ class _HomeWeatherScreenState extends State<HomeWeatherScreen> {
           ),
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.history, color: Colors.white, size: 28),
+            tooltip: 'History',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const HistoryScreen()),
+              );
+            },
+          ),
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: IconButton(
@@ -52,7 +82,7 @@ class _HomeWeatherScreenState extends State<HomeWeatherScreen> {
               icon: const Icon(Icons.logout, color: Colors.white, size: 28),
               tooltip: 'Logout',
             ),
-          )
+          ),
         ],
       ),
       body: Container(
@@ -90,7 +120,9 @@ class _HomeWeatherScreenState extends State<HomeWeatherScreen> {
               controller: _searchController,
               onSubmitted: (value) {
                 if (value.isNotEmpty) {
-                  _location = value;
+                  setState(() {
+                    _location = value;
+                  });
                   _fetchWeather();
                 }
               },
@@ -98,13 +130,13 @@ class _HomeWeatherScreenState extends State<HomeWeatherScreen> {
                 hintText: 'Find your location',
                 suffixIcon: const Icon(Icons.search, color: Colors.grey),
                 filled: true,
-                // ignore: deprecated_member_use
                 fillColor: Colors.white.withOpacity(0.9),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(30.0),
                   borderSide: BorderSide.none,
                 ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 20.0),
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: 16.0, horizontal: 20.0),
               ),
             ),
             const SizedBox(height: 40),
